@@ -1,0 +1,30 @@
+{
+  "name": "courtnex-manager-backend",
+  "version": "1.0.0",
+  "description": "Backend API para CourtnexManager - Sistema de gestión para complejos deportivos",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:test": "node -e \"require('./db').testConnection()\""
+  },
+  "keywords": [
+    "courtnex",
+    "gestión-deportiva",
+    "reservas",
+    "complejos-deportivos",
+    "api",
+    "nodejs"
+  ],
+  "author": "Franco Ferrari",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^5.1.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

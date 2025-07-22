@@ -1,19 +1,33 @@
 {
   "name": "courtnex-manager",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Sistema integral de gestión para complejos deportivos",
+  "private": true,
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:start\"",
+    "backend:dev": "cd backend && npm run dev",
+    "backend:start": "cd backend && npm start",
+    "backend:install": "cd backend && npm install",
+    "frontend:start": "cd frontend && npm start",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:install": "cd frontend && npm install",
+    "install:all": "npm run backend:install && npm run frontend:install",
+    "db:setup": "psql -d courtnex_db -f database/database_schema.sql",
+    "db:create": "createdb courtnex_db",
+    "setup": "npm run install:all && npm run db:create && npm run db:setup"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "express": "^5.1.0",
-    "pg": "^8.16.3",
-    "dotenv": "^16.4.5"
-  }
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "courtnex",
+    "gestión-deportiva",
+    "reservas",
+    "complejos-deportivos",
+    "nodejs",
+    "react",
+    "postgresql"
+  ],
+  "author": "Franco Ferrari",
+  "license": "MIT"
 }

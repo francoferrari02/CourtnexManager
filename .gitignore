@@ -49,3 +49,22 @@ coverage/
 # Archivos de build
 dist/
 build/
+
+# Frontend build
+frontend/build/
+frontend/.eslintcache
+
+# Backend logs
+backend/logs/
+
+# Archivos de VSCode
+.vscode/
+
+# Archivos de sistema
+.DS_Store
+*.swp
+*.swo
+
+# Coverage reports
+coverage/
+*.lcov
