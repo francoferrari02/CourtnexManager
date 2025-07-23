@@ -28,96 +28,105 @@ CourtnexManager/
 
 ## 🚀 Inicio Rápido
 
-### Prerrequisitos
-
-- Node.js (v16 o superior)
-- PostgreSQL (v12 o superior)
-- npm o yarn
-
-### 1. Configurar Base de Datos
+### ✨ Comando Simple (Recomendado)
 
 ```bash
-# Crear base de datos PostgreSQL
-createdb courtnex_db
-
-# Ejecutar esquema de base de datos
-psql -d courtnex_db -f database/database_schema.sql
-```
-
-### 2. Configurar Backend
-
-```bash
-# Navegar a la carpeta backend
-cd backend
-
-# Instalar dependencias
-npm install
-
-# Copiar archivo de variables de entorno
-cp ../.env.example .env
-
-# Editar .env con tus credenciales de base de datos
-# DB_HOST=localhost
-# DB_PORT=5432
-# DB_NAME=courtnex_db
-# DB_USER=tu_usuario
-# DB_PASSWORD=tu_contraseña
-# PORT=3000
-
-# Iniciar servidor en modo desarrollo
+# Ejecutar todo el sistema (Backend + Frontend + BD)
 npm run dev
+
+# El comando anterior iniciará automáticamente:
+# ✅ Backend en http://localhost:3000
+# ✅ Frontend en http://localhost:3001
+# ✅ Verificará que PostgreSQL esté funcionando
 ```
 
-El servidor estará disponible en: `http://localhost:3000`
-
-### 3. Configurar Frontend
+### 🛑 Detener el Sistema
 
 ```bash
-# Abrir nueva terminal y navegar a la carpeta frontend
-cd frontend
+# Método 1: Detener desde la terminal (Recomendado)
+Ctrl + C                    # En la terminal donde ejecutaste npm run dev
 
-# Instalar dependencias (ya están instaladas por create-react-app)
-npm install
+# Método 2: Comando de detención
+npm run stop               # Detiene todos los procesos relacionados
 
-# Iniciar aplicación React en modo desarrollo
-npm start
+# Método 3: Detención manual por puerto
+lsof -ti:3000 | xargs kill -9    # Detener backend (puerto 3000)
+lsof -ti:3001 | xargs kill -9    # Detener frontend (puerto 3001)
 ```
 
-La aplicación estará disponible en: `http://localhost:3001`
+### ⚡ Comandos Rápidos
+
+```bash
+# 🚀 Iniciar todo
+npm run dev
+
+# 🛑 Detener todo  
+Ctrl + C  (o npm run stop)
+
+# 🔄 Reiniciar todo
+npm run stop && npm run dev
+
+# 📊 Ver estado
+curl http://localhost:3000/api/health    # Estado del backend
+open http://localhost:3001               # Abrir frontend en navegador
+```
+
+### 📋 Comandos Individuales
+
+```bash
+# Solo Backend
+npm run backend:dev
+
+# Solo Frontend  
+npm run frontend:start
+
+# Verificar estado de la base de datos
+npm run db:test
+
+# Instalar todas las dependencias
+npm run install:all
+
+# Configuración inicial completa
+npm run setup
+```
 
 ## 📊 Scripts Disponibles
 
-### Backend
+### 🎯 Scripts Principales
 
 ```bash
-cd backend
+# 🚀 INICIAR TODO EL SISTEMA
+npm run dev                 # Backend + Frontend simultáneamente
 
-# Iniciar servidor
-npm start
+# 🛑 DETENER SISTEMA  
+Ctrl + C                    # En la terminal donde corre npm run dev
 
-# Desarrollo con recarga automática
-npm run dev
-
-# Ejecutar tests
-npm test
+# 📦 INSTALACIÓN
+npm run install:all         # Instala dependencias de backend y frontend
+npm run setup              # Configuración inicial completa (BD + dependencias)
 ```
 
-### Frontend
+### 🔧 Scripts por Componente
 
+#### Backend
 ```bash
-cd frontend
+npm run backend:dev        # Desarrollo con hot-reload
+npm run backend:start      # Producción
+npm run backend:install    # Solo dependencias del backend
+```
 
-# Iniciar desarrollo
-npm start
+#### Frontend
+```bash
+npm run frontend:start     # Desarrollo
+npm run frontend:build     # Build de producción  
+npm run frontend:install   # Solo dependencias del frontend
+```
 
-# Construir para producción
-npm run build
-
-# Ejecutar tests
-npm test
-
-# Eject configuración (irreversible)
-npm run eject
+#### Base de Datos
+```bash
+npm run db:setup          # Ejecutar esquema de BD
+npm run db:create         # Crear base de datos
+npm run db:test           # Probar conexión
 ```
 
 ## 🔧 Variables de Entorno
@@ -162,60 +171,101 @@ El sistema utiliza PostgreSQL con el siguiente esquema:
 
 Ver `database/DATABASE_README.md` para más detalles.
 
-## 🎯 Funcionalidades Principales
+## 🎯 Estado Actual del Proyecto
 
-### ✅ Implementadas
-- ✅ Esquema de base de datos completo
-- ✅ Servidor Express básico
-- ✅ Conexión a PostgreSQL
-- ✅ Endpoints de salud
-- ✅ Proyecto React inicial
+### ✅ Completamente Funcional
+- ✅ **Backend API**: Express + PostgreSQL funcionando
+- ✅ **Frontend TypeScript**: React con tipos completos
+- ✅ **Base de Datos**: Esquema completo con datos de ejemplo
+- ✅ **Conexión Full-Stack**: Frontend ↔ Backend ↔ Database
+- ✅ **Página Gestor**: Mostrando información real del complejo
+- ✅ **Hot-reload**: Desarrollo ágil en ambos entornos
 
-### 🚧 En Desarrollo
-- 🚧 API REST para gestión de reservas
-- 🚧 Interfaz de usuario React
-- 🚧 Autenticación y autorización
-- 🚧 Dashboard de administración
-
-### 📋 Planificadas
-- 📋 Sistema de pagos (MercadoPago)
-- 📋 Bot de WhatsApp (Plan Premium)
-- 📋 Gestión de torneos
-- 📋 Reportes y analíticas
-- 📋 App móvil
-
-## 🔍 Endpoints API
-
-### Salud del Sistema
+### � Endpoints API Disponibles
 - `GET /` - Información general del servidor
 - `GET /api/health` - Estado de salud y conexión a BD
+- `GET /api/complejos` - Listar todos los complejos ✨
+- `GET /api/complejos/:id` - Obtener complejo específico ✨
 
-### Próximos Endpoints
-- `POST /api/auth/login` - Autenticación
-- `GET /api/complejos` - Listar complejos
-- `GET /api/canchas` - Listar canchas
-- `POST /api/reservas` - Crear reserva
-- `GET /api/reservas` - Listar reservas
-- Y muchos más...
+### � Interfaz Actual
+- **Header**: Información completa del complejo desde BD
+- **Área Principal**: Zona blanca lista para desarrollo
+- **Responsive**: Optimizado para móvil y desktop
+- **Loading States**: Spinners y manejo de errores
+
+### 🚧 Próximas Implementaciones
+- � API REST para gestión de reservas
+- � Componentes TypeScript adicionales
+- 🚧 Autenticación y autorización
+- � Dashboard con métricas
+
+## 🔍 Verificación del Sistema
+
+### ✅ Cómo Saber que Todo Funciona
+
+Después de ejecutar `npm run dev`, deberías ver:
+
+```bash
+# En la terminal:
+[0] 🟢 Servidor Courtnex Manager corriendo en http://localhost:3000
+[1] Compiled successfully!
+[1] You can now view frontend in the browser.
+[1]   Local: http://localhost:3001
+```
+
+### 🧪 Probar Manualmente
+
+```bash
+# 1. Verificar backend
+curl http://localhost:3000/api/health
+curl http://localhost:3000/api/complejos
+
+# 2. Verificar base de datos  
+psql -d courtnex_db -c "SELECT COUNT(*) FROM complejos;"
+
+# 3. Verificar frontend
+open http://localhost:3001
+# Deberías ver la información del complejo en la parte superior
+```
+
+### 🚨 Solución de Problemas
+
+```bash
+# Puerto ocupado
+npm run stop                           # Detener procesos
+lsof -ti:3000,3001 | xargs kill -9    # Forzar detención
+
+# Error de base de datos
+pg_isready                             # Verificar PostgreSQL
+brew services restart postgresql      # Reiniciar PostgreSQL (macOS)
+
+# Error de dependencias
+npm run install:all                    # Reinstalar dependencias
+rm -rf node_modules && npm install    # Limpiar caché
+```
 
 ## 🛠️ Tecnologías
 
 ### Backend
-- Node.js
-- Express.js
-- PostgreSQL
+- Node.js + Express.js
+- PostgreSQL con pg (node-postgres)
+- CORS habilitado
 - JWT (próximamente)
 - Bcrypt (próximamente)
+- Nodemon para desarrollo
 
 ### Frontend
-- React 18
+- React 18 con TypeScript ✨
 - Create React App
-- CSS Modules / Styled Components (por definir)
-- Axios (para llamadas API)
+- CSS3 con diseño responsivo
+- Axios para llamadas API (próximamente)
+- Hooks y Context API
 
 ### Base de Datos
 - PostgreSQL 12+
 - Extensiones: uuid-ossp, pgcrypto
+- Esquema completo con índices optimizados
+- Triggers automáticos
 
 ## 🚀 Despliegue
 

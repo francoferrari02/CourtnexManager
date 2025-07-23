@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:start\"",
+    "stop": "pkill -f \"nodemon\\|react-scripts\\|concurrently\" || echo \"Procesos detenidos\"",
     "backend:dev": "cd backend && npm run dev",
     "backend:start": "cd backend && npm start",
     "backend:install": "cd backend && npm install",
@@ -14,6 +15,7 @@
     "install:all": "npm run backend:install && npm run frontend:install",
     "db:setup": "psql -d courtnex_db -f database/database_schema.sql",
     "db:create": "createdb courtnex_db",
+    "db:test": "cd backend && npm run db:test",
     "setup": "npm run install:all && npm run db:create && npm run db:setup"
   },
   "devDependencies": {
