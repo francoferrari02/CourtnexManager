@@ -1,4 +1,5 @@
 // Exportaciones principales del GestorDeCanchas
 export { default as GestorPlano } from './GestorPlano';
 export { default as Plano } from './Plano';
+export { default as CanchaForm } from './CanchaForm';
 export * from './Botones';

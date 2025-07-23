@@ -176,6 +176,7 @@ const Gestor: React.FC = () => {
                 gridSize={25}
                 minZoom={0.3}
                 maxZoom={4}
+                complejoId={complejo?.id}
               />
             </div>
           </div>

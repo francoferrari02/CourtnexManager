@@ -22,6 +22,47 @@ app.use((req, res, next) => {
   next();
 });
 
+
+// Función para iniciar el servidor
+const startServer = async () => {
+  try {
+    // Probar conexión a la base de datos al iniciar
+    console.log('🚀 Iniciando Courtnex Manager...');
+    console.log('📊 Probando conexión a la base de datos...');
+    
+    const dbConnected = await testConnection();
+    if (!dbConnected) {
+      console.warn('⚠️  Advertencia: No se pudo conectar a la base de datos, pero el servidor continuará');
+    }
+    
+    app.listen(port, () => {
+      console.log(`🟢 Servidor Courtnex Manager corriendo en http://localhost:${port}`);
+      console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🔗 Health check: http://localhost:${port}/api/health`);
+    });
+  } catch (error) {
+    console.error('🔴 Error al iniciar el servidor:', error);
+    process.exit(1);
+  }
+};
+
+// Manejo de cierre graceful
+process.on('SIGINT', async () => {
+  console.log('\n🟡 Recibida señal SIGINT, cerrando servidor...');
+  await closePool();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('\n🟡 Recibida señal SIGTERM, cerrando servidor...');
+  await closePool();
+  process.exit(0);
+});
+
+// Iniciar el servidor
+startServer();
+
+
 app.get('/', (req, res) => {
   res.json({
     message: '¡Bienvenido a Courtnex Manager!',
@@ -121,41 +162,125 @@ app.get('/api/complejos/:id', async (req, res) => {
   }
 });
 
-// Función para iniciar el servidor
-const startServer = async () => {
+// ============================================
+// ENDPOINTS DE CANCHAS
+// ============================================
+
+// Endpoint para obtener todas las canchas de un complejo
+app.get('/api/complejos/:complejo_id/canchas', async (req, res) => {
   try {
-    // Probar conexión a la base de datos al iniciar
-    console.log('🚀 Iniciando Courtnex Manager...');
-    console.log('📊 Probando conexión a la base de datos...');
+    const { complejo_id } = req.params;
+    const result = await query(`
+      SELECT 
+        id,
+        complejo_id,
+        nombre,
+        tipo_deporte,
+        dimensiones,
+        capacidad_jugadores,
+        precio_hora,
+        coordenadas_mapa,
+        equipamiento_incluido,
+        estado,
+        iluminacion,
+        techada,
+        descripcion,
+        fotos,
+        activa,
+        created_at,
+        updated_at
+      FROM canchas 
+      WHERE complejo_id = $1 AND activa = true
+      ORDER BY nombre ASC
+    `, [complejo_id]);
     
-    const dbConnected = await testConnection();
-    if (!dbConnected) {
-      console.warn('⚠️  Advertencia: No se pudo conectar a la base de datos, pero el servidor continuará');
-    }
-    
-    app.listen(port, () => {
-      console.log(`🟢 Servidor Courtnex Manager corriendo en http://localhost:${port}`);
-      console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🔗 Health check: http://localhost:${port}/api/health`);
-    });
+    res.json(result.rows);
   } catch (error) {
-    console.error('🔴 Error al iniciar el servidor:', error);
-    process.exit(1);
+    console.error('Error al obtener canchas:', error);
+    res.status(500).json({
+      error: 'Error interno del servidor',
+      message: 'No se pudieron obtener las canchas',
+      timestamp: new Date().toISOString()
+    });
   }
-};
-
-// Manejo de cierre graceful
-process.on('SIGINT', async () => {
-  console.log('\n🟡 Recibida señal SIGINT, cerrando servidor...');
-  await closePool();
-  process.exit(0);
 });
 
-process.on('SIGTERM', async () => {
-  console.log('\n🟡 Recibida señal SIGTERM, cerrando servidor...');
-  await closePool();
-  process.exit(0);
+// Endpoint para crear una nueva cancha
+app.post('/api/complejos/:complejo_id/canchas', async (req, res) => {
+  try {
+    const { complejo_id } = req.params;
+    const {
+      nombre,
+      tipo,
+      ancho,
+      largo,
+      superficie,
+      iluminacion = false,
+      techada = false,
+      precio_hora,
+      activa = true,
+      observaciones
+    } = req.body;
+
+    // Validaciones básicas
+    if (!nombre || !tipo || !ancho || !largo || precio_hora === undefined) {
+      return res.status(400).json({
+        error: 'Datos incompletos',
+        message: 'Nombre, tipo, dimensiones y precio son obligatorios'
+      });
+    }
+
+    // Preparar datos para insertar
+    const dimensiones = {
+      largo: parseFloat(largo),
+      ancho: parseFloat(ancho),
+      unidad: 'metros',
+      superficie: superficie
+    };
+
+    const equipamiento = []; // Por ahora vacío, se puede expandir
+
+    const result = await query(`
+      INSERT INTO canchas (
+        complejo_id,
+        nombre,
+        tipo_deporte,
+        dimensiones,
+        capacidad_jugadores,
+        precio_hora,
+        iluminacion,
+        techada,
+        descripcion,
+        equipamiento_incluido,
+        activa
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING *
+    `, [
+      complejo_id,
+      nombre,
+      tipo,
+      JSON.stringify(dimensiones),
+      4, // capacidad por defecto
+      parseFloat(precio_hora),
+      iluminacion,
+      techada,
+      observaciones || null,
+      JSON.stringify(equipamiento),
+      activa
+    ]);
+
+    res.status(201).json({
+      message: 'Cancha creada exitosamente',
+      cancha: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('Error al crear cancha:', error);
+    res.status(500).json({
+      error: 'Error interno del servidor',
+      message: 'No se pudo crear la cancha',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
-// Iniciar el servidor
-startServer();

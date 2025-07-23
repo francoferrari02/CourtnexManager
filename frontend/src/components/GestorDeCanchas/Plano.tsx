@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import './Plano.css';
+import './css/Plano.css';
 
 interface PlanoProps {
   width?: number;
