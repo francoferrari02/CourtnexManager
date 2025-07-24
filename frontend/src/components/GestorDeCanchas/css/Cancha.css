@@ -1,0 +1,91 @@
+/* Cancha.css */
+.cancha-component {
+  position: absolute;
+  width: 80px;  /* Más ajustado para eliminar bordes blancos */
+  height: 115px; /* Más ajustado para eliminar bordes blancos */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 20;
+  overflow: visible; /* Cambio a visible para que se vea la etiqueta externa */
+}
+
+/* Contenedor de la imagen de la cancha */
+.cancha-image-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background-color: transparent;
+}
+
+.cancha-component:hover {
+  transform: translateY(-2px);
+  z-index: 25;
+}
+
+.cancha-component:hover .cancha-image-container {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.cancha-component.selected .cancha-image-container {
+  border-width: 4px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.cancha-component.selected {
+  z-index: 30;
+}
+
+/* Nombre fuera del recuadro, en la parte superior */
+.cancha-nombre-overlay {
+  position: absolute;
+  top: -25px; /* Posicionado fuera del recuadro, arriba */
+  left: 50%; /* Centrar horizontalmente */
+  transform: translateX(-50%); /* Centrar perfectamente */
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap; /* Mantener en una línea */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  z-index: 50; /* Z-index más alto para asegurar visibilidad */
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  pointer-events: none; /* Para que no interfiera con los clicks */
+  min-width: 80px; /* Ancho mínimo igual al recuadro */
+  width: max-content; /* Expandir según el contenido */
+}
+
+/* Responsive para diferentes tamaños */
+@media (max-width: 768px) {
+  .cancha-component {
+    width: 65px;   /* Mantener proporción ajustada en responsive */
+    height: 95px;
+  }
+  
+  .cancha-nombre-overlay {
+    font-size: 10px;
+    padding: 2px 4px;
+    top: -22px; /* Ajuste para pantallas pequeñas */
+    min-width: 65px; /* Ajustar ancho mínimo al responsive */
+  }
+}
+
+/* Animaciones */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.cancha-component {
+  animation: aparecer 0.3s ease-out;
+}

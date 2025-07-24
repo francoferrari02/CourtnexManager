@@ -22,6 +22,7 @@ const GestorPlano: React.FC<GestorPlanoProps> = ({
   complejoId
 }) => {
   const [isCanchaFormOpen, setIsCanchaFormOpen] = useState<boolean>(false);
+  const [refreshKey, setRefreshKey] = useState<number>(0);
 
   // Handlers para los botones
   const handleAgregarCancha = () => {
@@ -65,6 +66,7 @@ const GestorPlano: React.FC<GestorPlanoProps> = ({
       }
       
       setIsCanchaFormOpen(false);
+      setRefreshKey(prev => prev + 1); // Trigger refresh
       alert('¡Cancha creada exitosamente!');
     } catch (error) {
       console.error('Error al crear cancha:', error);
@@ -118,6 +120,8 @@ const GestorPlano: React.FC<GestorPlanoProps> = ({
           gridSize={gridSize}
           minZoom={minZoom}
           maxZoom={maxZoom}
+          complejoId={complejoId}
+          key={refreshKey}
         />
       </div>
 

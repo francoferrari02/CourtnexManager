@@ -1,4 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import Cancha from './Cancha';
 import './css/Plano.css';
 
 interface PlanoProps {
@@ -7,6 +8,7 @@ interface PlanoProps {
   gridSize?: number;
   minZoom?: number;
   maxZoom?: number;
+  complejoId?: string;
 }
 
 const Plano: React.FC<PlanoProps> = ({
@@ -14,14 +16,57 @@ const Plano: React.FC<PlanoProps> = ({
   height = 600,
   gridSize = 20,
   minZoom = 0.5,
-  maxZoom = 3
+  maxZoom = 3,
+  complejoId
 }) => {
   const [zoom, setZoom] = useState<number>(1);
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [canchas, setCanchas] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [selectedCancha, setSelectedCancha] = useState<string | null>(null);
   
   const planoRef = useRef<HTMLDivElement>(null);
+
+  // Cargar canchas cuando cambie el complejoId
+  useEffect(() => {
+    if (complejoId) {
+      loadCanchas();
+    }
+  }, [complejoId]);
+
+  const loadCanchas = async () => {
+    if (!complejoId) return;
+    
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:3000/api/complejos/${complejoId}/canchas`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        // Asignar coordenadas aleatorias a canchas que no las tengan
+        const canchasConCoordenadas = data.map((cancha: any, index: number) => ({
+          ...cancha,
+          coordenadas_mapa: cancha.coordenadas_mapa || {
+            x: 150 + (index % 4) * 150,
+            y: 100 + Math.floor(index / 4) * 120
+          }
+        }));
+        setCanchas(canchasConCoordenadas);
+      } else {
+        console.error('Error al cargar canchas:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error al cargar canchas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCanchaClick = (cancha: any) => {
+    setSelectedCancha(selectedCancha === cancha.id ? null : cancha.id);
+  };
 
   // Funciones de zoom
   const handleZoomIn = useCallback(() => {
@@ -152,13 +197,30 @@ const Plano: React.FC<PlanoProps> = ({
             <div className="center-cross"></div>
           </div>
 
-          {/* Área donde se agregarán las canchas */}
+          {/* Área donde se muestran las canchas */}
           <div className="canchas-container">
-            {/* Las canchas se agregarán aquí posteriormente */}
-            <div className="placeholder-cancha">
-              <span>🏟️</span>
-              <p>Las canchas aparecerán aquí</p>
-            </div>
+            {loading && (
+              <div className="loading-canchas">
+                <span>🔄</span>
+                <p>Cargando canchas...</p>
+              </div>
+            )}
+            
+            {!loading && canchas.length === 0 && (
+              <div className="placeholder-cancha">
+                <span>🏟️</span>
+                <p>Las canchas aparecerán aquí</p>
+              </div>
+            )}
+
+            {!loading && canchas.length > 0 && canchas.map((cancha) => (
+              <Cancha
+                key={cancha.id}
+                cancha={cancha}
+                onClick={handleCanchaClick}
+                isSelected={selectedCancha === cancha.id}
+              />
+            ))}
           </div>
         </div>
       </div>
