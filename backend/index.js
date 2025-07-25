@@ -284,3 +284,155 @@ app.post('/api/complejos/:complejo_id/canchas', async (req, res) => {
   }
 });
 
+// Endpoint para eliminar una cancha
+app.delete('/api/canchas/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verificar que la cancha existe
+    const checkResult = await query('SELECT * FROM canchas WHERE id = $1', [id]);
+    
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Cancha no encontrada',
+        message: `No se encontró la cancha con ID: ${id}`
+      });
+    }
+
+    // Eliminar la cancha (las reservas se eliminarán en cascada si está configurado)
+    await query('DELETE FROM canchas WHERE id = $1', [id]);
+
+    res.json({
+      message: 'Cancha eliminada exitosamente',
+      cancha_id: id
+    });
+
+  } catch (error) {
+    console.error('Error al eliminar cancha:', error);
+    res.status(500).json({
+      error: 'Error interno del servidor',
+      message: 'No se pudo eliminar la cancha',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Endpoint para obtener una cancha específica
+app.get('/api/canchas/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await query(`
+      SELECT 
+        id,
+        complejo_id,
+        nombre,
+        tipo_deporte,
+        dimensiones,
+        capacidad_jugadores,
+        precio_hora,
+        coordenadas_mapa,
+        equipamiento_incluido,
+        estado,
+        iluminacion,
+        techada,
+        descripcion,
+        fotos,
+        activa,
+        created_at,
+        updated_at
+      FROM canchas 
+      WHERE id = $1 AND activa = true
+    `, [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Cancha no encontrada',
+        message: `No se encontró la cancha con ID: ${id}`
+      });
+    }
+
+    res.json(result.rows[0]);
+
+  } catch (error) {
+    console.error('Error al obtener cancha:', error);
+    res.status(500).json({
+      error: 'Error interno del servidor',
+      message: 'No se pudo obtener la cancha',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Endpoint para actualizar una cancha
+app.put('/api/canchas/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      nombre,
+      tipo_deporte,
+      dimensiones,
+      precio_hora,
+      iluminacion,
+      techada,
+      estado,
+      observaciones,
+      equipamiento,
+      coordenadas_mapa
+    } = req.body;
+
+    // Verificar que la cancha existe
+    const checkResult = await query('SELECT * FROM canchas WHERE id = $1', [id]);
+    
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Cancha no encontrada',
+        message: `No se encontró la cancha con ID: ${id}`
+      });
+    }
+
+    // Actualizar la cancha
+    const result = await query(`
+      UPDATE canchas SET
+        nombre = $1,
+        tipo_deporte = $2,
+        dimensiones = $3,
+        precio_hora = $4,
+        iluminacion = $5,
+        techada = $6,
+        estado = $7,
+        descripcion = $8,
+        equipamiento_incluido = $9,
+        coordenadas_mapa = $10,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $11
+      RETURNING *
+    `, [
+      nombre,
+      tipo_deporte,
+      JSON.stringify(dimensiones),
+      parseFloat(precio_hora),
+      iluminacion,
+      techada,
+      estado || 'disponible',
+      observaciones || null,
+      JSON.stringify(equipamiento || {}),
+      coordenadas_mapa ? JSON.stringify(coordenadas_mapa) : null,
+      id
+    ]);
+
+    res.json({
+      message: 'Cancha actualizada exitosamente',
+      cancha: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('Error al actualizar cancha:', error);
+    res.status(500).json({
+      error: 'Error interno del servidor',
+      message: 'No se pudo actualizar la cancha',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+

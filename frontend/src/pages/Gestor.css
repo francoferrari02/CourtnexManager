@@ -201,10 +201,88 @@
 }
 
 .plano-wrapper {
-  margin: 30px 0;
+  background-color: white;
+  border: 2px solid #e5e7eb;
   border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex: 1;
+}
+
+/* Nueva área de contenido principal */
+.main-content-area {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  min-height: 600px;
+}
+
+/* Panel de turnos */
+.turnos-panel {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.turnos-controls {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.turnos-controls h3 {
+  color: white;
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.control-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-agregar-turno,
+.btn-limpiar-turnos {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-agregar-turno {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.btn-agregar-turno:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+}
+
+.btn-limpiar-turnos {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.btn-limpiar-turnos:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
 }
 
 .placeholder-content {
@@ -298,6 +376,34 @@
     margin: 20px 0;
   }
   
+  .main-content-area {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .turnos-panel {
+    order: -1; /* Mostrar turnos arriba en móvil */
+  }
+  
+  .turnos-controls {
+    padding: 12px;
+  }
+  
+  .turnos-controls h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  .control-buttons {
+    gap: 6px;
+  }
+  
+  .btn-agregar-turno,
+  .btn-limpiar-turnos {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  
   .placeholder-content {
     padding-top: 30px;
     margin-top: 30px;
@@ -328,6 +434,30 @@
   
   .plano-wrapper {
     margin: 15px 0;
+  }
+  
+  .main-content-area {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .turnos-controls {
+    padding: 10px;
+  }
+  
+  .turnos-controls h3 {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  
+  .control-buttons {
+    gap: 4px;
+  }
+  
+  .btn-agregar-turno,
+  .btn-limpiar-turnos {
+    padding: 5px 8px;
+    font-size: 10px;
   }
   
   .placeholder-content {

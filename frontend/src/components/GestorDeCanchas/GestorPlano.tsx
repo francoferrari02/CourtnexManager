@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Plano from './Plano';
 import CanchaForm from './CanchaForm';
+import CanchaInfo from './CanchaInfo';
 import { BotonAgregarCancha, BotonEditar, BotonFiltrar } from './Botones';
 import './css/GestorPlano.css';
 
@@ -22,6 +23,10 @@ const GestorPlano: React.FC<GestorPlanoProps> = ({
   complejoId
 }) => {
   const [isCanchaFormOpen, setIsCanchaFormOpen] = useState<boolean>(false);
+  const [isCanchaInfoOpen, setIsCanchaInfoOpen] = useState<boolean>(false);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [repositionMode, setRepositionMode] = useState<string | null>(null); // ID de la cancha en modo reposición
+  const [selectedCanchaForEdit, setSelectedCanchaForEdit] = useState<any>(null);
   const [refreshKey, setRefreshKey] = useState<number>(0);
 
   // Handlers para los botones
@@ -32,7 +37,7 @@ const GestorPlano: React.FC<GestorPlanoProps> = ({
 
   const handleEditar = () => {
     console.log('Editar clicked');
-    // TODO: Implementar funcionalidad
+    setIsEditMode(!isEditMode);
   };
 
   const handleFiltrar = () => {
@@ -42,6 +47,82 @@ const GestorPlano: React.FC<GestorPlanoProps> = ({
 
   const handleCloseCanchaForm = () => {
     setIsCanchaFormOpen(false);
+  };
+
+  const handleCloseCanchaInfo = () => {
+    setIsCanchaInfoOpen(false);
+    setSelectedCanchaForEdit(null);
+  };
+
+  const handleEditCancha = (cancha: any) => {
+    setSelectedCanchaForEdit(cancha);
+    setIsCanchaInfoOpen(true);
+  };
+
+  const handleDeleteCancha = async (cancha: any) => {
+    const confirmDelete = window.confirm(
+      `¿Estás seguro de eliminar "${cancha.nombre}"?\n\nTodas las reservas en esta cancha se eliminarán de la base de datos.`
+    );
+    
+    if (confirmDelete) {
+      try {
+        await eliminarCancha(cancha.id);
+        setRefreshKey(prev => prev + 1);
+        alert('Cancha eliminada exitosamente');
+      } catch (error) {
+        console.error('Error al eliminar cancha:', error);
+        alert('Error al eliminar la cancha. Por favor, intenta nuevamente.');
+      }
+    }
+  };
+
+  const handleRepositionCancha = (cancha: any) => {
+    console.log('Activar modo reposición para:', cancha.nombre);
+    setRepositionMode(cancha.id);
+  };
+
+  const handleCanchaPositionUpdate = async (canchaId: string, newPosition: any) => {
+    try {
+      console.log('Actualizando posición:', { canchaId, newPosition });
+      
+      // Obtener los datos actuales de la cancha
+      const canchaActual = await obtenerCancha(canchaId);
+      if (!canchaActual) {
+        throw new Error('No se pudo obtener la información actual de la cancha');
+      }
+      
+      // Actualizar solo las coordenadas, manteniendo el resto de datos
+      const datosActualizados = {
+        ...canchaActual,
+        coordenadas_mapa: newPosition
+      };
+      
+      await actualizarCancha(canchaId, datosActualizados);
+      setRepositionMode(null); // Salir del modo reposición
+      setRefreshKey(prev => prev + 1);
+      console.log('Posición actualizada exitosamente');
+    } catch (error) {
+      console.error('Error al actualizar posición de cancha:', error);
+      alert('Error al actualizar la posición de la cancha.');
+      setRepositionMode(null); // Salir del modo incluso si hay error
+    }
+  };
+
+  const handleCancelReposition = () => {
+    setRepositionMode(null);
+  };
+
+  const handleUpdateCancha = async (canchaId: string, updatedData: any) => {
+    try {
+      await actualizarCancha(canchaId, updatedData);
+      setRefreshKey(prev => prev + 1);
+      setIsCanchaInfoOpen(false);
+      setSelectedCanchaForEdit(null);
+      alert('Cancha actualizada exitosamente');
+    } catch (error) {
+      console.error('Error al actualizar cancha:', error);
+      alert('Error al actualizar la cancha. Por favor, intenta nuevamente.');
+    }
   };
 
   const handleSubmitCancha = async (canchaData: any) => {
@@ -91,6 +172,47 @@ const GestorPlano: React.FC<GestorPlanoProps> = ({
     return await response.json();
   };
 
+  const eliminarCancha = async (canchaId: string) => {
+    const response = await fetch(`http://localhost:3000/api/canchas/${canchaId}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al eliminar la cancha');
+    }
+
+    return await response.json();
+  };
+
+  const obtenerCancha = async (canchaId: string) => {
+    const response = await fetch(`http://localhost:3000/api/canchas/${canchaId}`);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al obtener la cancha');
+    }
+
+    return await response.json();
+  };
+
+  const actualizarCancha = async (canchaId: string, updatedData: any) => {
+    const response = await fetch(`http://localhost:3000/api/canchas/${canchaId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al actualizar la cancha');
+    }
+
+    return await response.json();
+  };
+
   return (
     <div className="gestor-plano-container">
       {/* Barra de herramientas */}
@@ -102,7 +224,7 @@ const GestorPlano: React.FC<GestorPlanoProps> = ({
         <div className="toolbar-center">
           <div className="toolbar-buttons">
             <BotonAgregarCancha onClick={handleAgregarCancha} />
-            <BotonEditar onClick={handleEditar} />
+            <BotonEditar onClick={handleEditar} isActive={isEditMode} />
             <BotonFiltrar onClick={handleFiltrar} />
           </div>
         </div>
@@ -121,6 +243,13 @@ const GestorPlano: React.FC<GestorPlanoProps> = ({
           minZoom={minZoom}
           maxZoom={maxZoom}
           complejoId={complejoId}
+          isEditMode={isEditMode}
+          repositionMode={repositionMode}
+          onEditCancha={handleEditCancha}
+          onDeleteCancha={handleDeleteCancha}
+          onRepositionCancha={handleRepositionCancha}
+          onPositionUpdate={handleCanchaPositionUpdate}
+          onCancelReposition={handleCancelReposition}
           key={refreshKey}
         />
       </div>
@@ -131,6 +260,16 @@ const GestorPlano: React.FC<GestorPlanoProps> = ({
         onClose={handleCloseCanchaForm}
         onSubmit={handleSubmitCancha}
       />
+
+      {/* Modal de información/edición de cancha */}
+      {selectedCanchaForEdit && (
+        <CanchaInfo
+          isOpen={isCanchaInfoOpen}
+          cancha={selectedCanchaForEdit}
+          onClose={handleCloseCanchaInfo}
+          onUpdate={handleUpdateCancha}
+        />
+      )}
     </div>
   );
 };

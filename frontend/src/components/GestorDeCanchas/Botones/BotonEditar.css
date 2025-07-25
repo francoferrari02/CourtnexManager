@@ -32,6 +32,16 @@
   box-shadow: none;
 }
 
+.boton-editar.active {
+  background: #dc2626;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+}
+
+.boton-editar.active:hover:not(.disabled) {
+  background: #b91c1c;
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+}
+
 .boton-icon {
   flex-shrink: 0;
 }

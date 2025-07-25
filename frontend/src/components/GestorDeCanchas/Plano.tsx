@@ -9,6 +9,13 @@ interface PlanoProps {
   minZoom?: number;
   maxZoom?: number;
   complejoId?: string;
+  isEditMode?: boolean;
+  repositionMode?: string | null;
+  onEditCancha?: (cancha: any) => void;
+  onDeleteCancha?: (cancha: any) => void;
+  onRepositionCancha?: (cancha: any) => void;
+  onPositionUpdate?: (canchaId: string, newPosition: any) => void;
+  onCancelReposition?: () => void;
 }
 
 const Plano: React.FC<PlanoProps> = ({
@@ -17,7 +24,14 @@ const Plano: React.FC<PlanoProps> = ({
   gridSize = 20,
   minZoom = 0.5,
   maxZoom = 3,
-  complejoId
+  complejoId,
+  isEditMode = false,
+  repositionMode = null,
+  onEditCancha,
+  onDeleteCancha,
+  onRepositionCancha,
+  onPositionUpdate,
+  onCancelReposition
 }) => {
   const [zoom, setZoom] = useState<number>(1);
   const [isPanning, setIsPanning] = useState<boolean>(false);
@@ -29,14 +43,7 @@ const Plano: React.FC<PlanoProps> = ({
   
   const planoRef = useRef<HTMLDivElement>(null);
 
-  // Cargar canchas cuando cambie el complejoId
-  useEffect(() => {
-    if (complejoId) {
-      loadCanchas();
-    }
-  }, [complejoId]);
-
-  const loadCanchas = async () => {
+  const loadCanchas = useCallback(async () => {
     if (!complejoId) return;
     
     try {
@@ -62,7 +69,14 @@ const Plano: React.FC<PlanoProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [complejoId]);
+
+  // Cargar canchas cuando cambie el complejoId
+  useEffect(() => {
+    if (complejoId) {
+      loadCanchas();
+    }
+  }, [complejoId, loadCanchas]);
 
   const handleCanchaClick = (cancha: any) => {
     setSelectedCancha(selectedCancha === cancha.id ? null : cancha.id);
@@ -84,6 +98,9 @@ const Plano: React.FC<PlanoProps> = ({
 
   // Funciones de pan (arrastrar)
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    // No permitir pan si hay una cancha en modo reposición
+    if (repositionMode) return;
+    
     if (e.button === 0) { // Solo botón izquierdo
       setIsPanning(true);
       setPanStart({
@@ -91,16 +108,19 @@ const Plano: React.FC<PlanoProps> = ({
         y: e.clientY - panOffset.y
       });
     }
-  }, [panOffset]);
+  }, [panOffset, repositionMode]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    // No permitir pan si hay una cancha en modo reposición
+    if (repositionMode) return;
+    
     if (isPanning) {
       setPanOffset({
         x: e.clientX - panStart.x,
         y: e.clientY - panStart.y
       });
     }
-  }, [isPanning, panStart]);
+  }, [isPanning, panStart, repositionMode]);
 
   const handleMouseUp = useCallback(() => {
     setIsPanning(false);
@@ -219,6 +239,13 @@ const Plano: React.FC<PlanoProps> = ({
                 cancha={cancha}
                 onClick={handleCanchaClick}
                 isSelected={selectedCancha === cancha.id}
+                isEditMode={isEditMode}
+                isRepositionMode={repositionMode === cancha.id}
+                onEdit={onEditCancha}
+                onDelete={onDeleteCancha}
+                onReposition={onRepositionCancha}
+                onPositionUpdate={onPositionUpdate}
+                onCancelReposition={onCancelReposition}
               />
             ))}
           </div>

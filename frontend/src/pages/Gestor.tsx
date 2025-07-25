@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GestorPlano } from '../components/GestorDeCanchas';
+import LlegadaScroll from '../components/GestorDeCanchas/LlegadaScroll';
 import './Gestor.css';
 
 interface Complejo {
@@ -15,10 +16,66 @@ interface Complejo {
   created_at: string;
 }
 
+interface TurnoData {
+  id: string;
+  horario: string;
+  cancha: string;
+  cliente: string;
+  estado: 'pendiente' | 'jugando';
+}
+
 const Gestor: React.FC = () => {
   const [complejo, setComplejo] = useState<Complejo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [turnos, setTurnos] = useState<TurnoData[]>([]);
+
+  // Debug: mostrar el estado actual de turnos
+  useEffect(() => {
+    console.log('📋 Estado actual de turnos:', turnos);
+  }, [turnos]);
+
+  // Función para agregar turnos de prueba
+  const agregarTurnoPrueba = () => {
+    console.log('🎯 Agregando turno de prueba...');
+    const canchas = ['Cancha 1', 'Cancha 2', 'Cancha 3', 'Cancha Principal'];
+    const clientes = ['Juan Pérez', 'María García', 'Carlos López', 'Ana Martín', 'Diego Silva'];
+    
+    const now = new Date();
+    const horario = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    
+    const nuevoTurno: TurnoData = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      horario: horario,
+      cancha: canchas[Math.floor(Math.random() * canchas.length)],
+      cliente: clientes[Math.floor(Math.random() * clientes.length)],
+      estado: 'pendiente'
+    };
+
+    console.log('🎯 Nuevo turno creado:', nuevoTurno);
+    setTurnos(prev => {
+      const newTurnos = [nuevoTurno, ...prev];
+      console.log('🎯 Turnos actualizados:', newTurnos);
+      return newTurnos;
+    });
+  };
+
+  // Función para confirmar asistencia
+  const confirmarAsistencia = (turnoId: string) => {
+    setTurnos(prev =>
+      prev.map(turno =>
+        turno.id === turnoId
+          ? { ...turno, estado: 'jugando' as const }
+          : turno
+      )
+    );
+  };
+
+  // Función para limpiar todos los turnos
+  const limpiarTurnos = () => {
+    console.log('🗑️ Limpiando todos los turnos...');
+    setTurnos([]);
+  };
 
   useEffect(() => {
     const fetchComplejo = async () => {
@@ -48,6 +105,25 @@ const Gestor: React.FC = () => {
     };
 
     fetchComplejo();
+    
+    // Agregar algunos turnos de ejemplo al cargar
+    const turnosEjemplo: TurnoData[] = [
+      {
+        id: '1',
+        horario: '14:30',
+        cancha: 'Cancha Principal',
+        cliente: 'Juan Pérez',
+        estado: 'pendiente'
+      },
+      {
+        id: '2',
+        horario: '15:00',
+        cancha: 'Cancha 2',
+        cliente: 'María García',
+        estado: 'jugando'
+      }
+    ];
+    setTurnos(turnosEjemplo);
   }, []);
 
   const formatTime = (time: string): string => {
@@ -168,16 +244,53 @@ const Gestor: React.FC = () => {
             <h2>🏗️ Plano del Complejo</h2>
             <p>Visualiza y organiza las canchas de tu complejo deportivo</p>
             
-            {/* Componente GestorPlano */}
-            <div className="plano-wrapper">
-              <GestorPlano 
-                width={800}
-                height={500}
-                gridSize={25}
-                minZoom={0.3}
-                maxZoom={4}
-                complejoId={complejo?.id}
-              />
+            {/* Área de contenido principal con plano y turnos */}
+            <div className="main-content-area">
+              {/* Componente GestorPlano */}
+              <div className="plano-wrapper">
+                <GestorPlano 
+                  width={800}
+                  height={500}
+                  gridSize={25}
+                  minZoom={0.3}
+                  maxZoom={4}
+                  complejoId={complejo?.id}
+                />
+              </div>
+              
+              {/* Panel de turnos */}
+              <div className="turnos-panel">
+                <div className="turnos-controls">
+                  <h3>🕐 Gestión de Turnos</h3>
+                  <div className="control-buttons">
+                    <button 
+                      className="btn-agregar-turno"
+                      onClick={() => {
+                        console.log('🔥 Botón clickeado!');
+                        agregarTurnoPrueba();
+                      }}
+                      title="Agregar turno de prueba"
+                    >
+                      ➕ Agregar Turno
+                    </button>
+                    <button 
+                      className="btn-limpiar-turnos"
+                      onClick={() => {
+                        console.log('🗑️ Botón limpiar clickeado!');
+                        limpiarTurnos();
+                      }}
+                      title="Limpiar todos los turnos"
+                    >
+                      🗑️ Limpiar
+                    </button>
+                  </div>
+                </div>
+                
+                <LlegadaScroll 
+                  turnos={turnos}
+                  onConfirmarAsistencia={confirmarAsistencia}
+                />
+              </div>
             </div>
           </div>
           
